@@ -12,7 +12,7 @@ Parse.Cloud.define("increaseUserCount", function(request, response) {
   });
 });
 
-Parse.Cloud.define("decreaseUserCount", function(request, response) {
+Parse.Cloud.define("decreaseUserCOunt", function(request, response) {
   var query = new Parse.Query("CurrentChats");
   query.equalTo("ChatRoomID", request.params.ChatRoomID);
   query.find({
