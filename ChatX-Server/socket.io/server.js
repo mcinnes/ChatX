@@ -1,7 +1,10 @@
+//Application,Rest-API,Session-Token are all to be moved into .env file
+
 // attach Socket.io to our HTTP server
 var socketio = require("socket.io");  
 io = socketio.listen(3000, "127.0.0.1");
 var request = require('request');
+var baseURL = "http://104.199.230.2/parse/";
 //eu*74tA3.QH;LjFg
 // handle incoming connections from clients
 io.sockets.on('connection', function(socket) {
@@ -33,9 +36,7 @@ io.sockets.on('connection', function(socket) {
 
     socket.on("advertisment", function(msg){
         //send advertisment to specific room
-    	io.sockets.in(msg['roomNumber']).emit("advertisment", msg);
-
-        
+    	io.sockets.in(msg['roomNumber']).emit("advertisment", msg);        
     });
     socket.on("image", function(msg){
         //send image to specific room
@@ -46,10 +47,11 @@ io.sockets.on('connection', function(socket) {
     });
 });
 
+//Increase user count of room when user joins
 function increaseCount(data){
 	request.put({
         //This url is wrong!
-		url: "http://104.199.230.2/parse/classes/CurrentChats/"+data['roomID'],
+		url: baseURL+"classes/CurrentChats/"+data['roomID'],
         json: true,
         headers: {
             "X-Parse-Application-Id": "ac300f8d17f1b7d1f01e251f091a8000d5aeb6b0",
@@ -61,13 +63,14 @@ function increaseCount(data){
     		console.log(body);
     });
 }
-
+//Save images from chat to database
 function uploadImage(data){
+	//Base64 encoded image file
      var dataToSubmit = {__ContentType : "image/jpeg", base64 : data};
  
     // First upload the image file
     request.post({
-        url: "http://104.199.230.2/parse/files/image.jpg",
+        url: baseURL+"files/image.jpg",
         json: true,
         headers: {
             "X-Parse-Application-Id": "ac300f8d17f1b7d1f01e251f091a8000d5aeb6b0",
@@ -80,10 +83,12 @@ function uploadImage(data){
         console.log("Repo: " + response);
     });
 }
+
+//Called when a user leaves a room, decreases current active members by 1
 function decreaseCount(data){
     request.put({
         //This url is wrong!
-        url: "http://104.199.230.2/parse/classes/CurrentChats/"+data['roomID'],
+        url: baseURL+"classes/CurrentChats/"+data['roomID'],
         json: true,
         headers: {
             "X-Parse-Application-Id": "ac300f8d17f1b7d1f01e251f091a8000d5aeb6b0",
@@ -95,11 +100,12 @@ function decreaseCount(data){
             console.log(body);
     });
 }
+
 function verifyUser(data, callback){
 //request data from server about logged in user
 
     request.get({
-        url: "http://104.199.230.2/parse/users/me",
+        url: baseURL+"parse/users/me",
         json: true,
         headers: {
             "X-Parse-Application-Id": "ac300f8d17f1b7d1f01e251f091a8000d5aeb6b0",
@@ -114,9 +120,10 @@ function verifyUser(data, callback){
     });
 }
 
+//Writes all messages in chat to database
 function sendToDB(data){
     request.post({
-        url: "http://104.199.230.2/parse/classes/"+data['roomNumber'],
+        url: baseURL+"classes/"+data['roomNumber'],
         json: true,
         headers: {
             "X-Parse-Application-Id": "ac300f8d17f1b7d1f01e251f091a8000d5aeb6b0",
